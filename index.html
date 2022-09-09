@@ -44,15 +44,18 @@
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;" >Aleno feed demo</h1>
-  <div class="card" style="width: 60rem; margin: auto;">
+  <h1 style="text-align: center;" >Swap feed demo powered by Aleno</h1>
+  <div class="card" style="width: 70rem; margin: auto; margin-top: 2rem;">
     <div class="card-body" style="display: flex; justify-content: space-between;" >
-      <div style="width: 30%;" >
+      <div style="width: calc(50% - 1rem);" >
         <h5 class="card-title">Demo description</h5>
-        <p>This is a demo of a swap feed api. Every time a block is mined, it appears below. You can click on any transaction to get details about swaps. Transactions without swaps are not displayed here (same for blocks). Currently, we support: Uniswap V2, Uniswap V3, Balancer V1, Balancer V2, SushiSwap, ShibaSwap On Ethereum blockchain, a block is fetched every 15 seconds on average.</p>
-        <a href="#" class="card-link">Aleno</a>
+        <p style="text-align: justify;" >This is a demo of a swap feed api. When you land on this page, an history of 10 blocks is loaded. Then every time a block is mined (on average every 15 seconds), it appears below. You can click on any transaction to get details about swaps. Transactions without swaps are not displayed here (same for blocks). Entities with their fields are presented on the left. You can open the console to see logs of fetched entities.</p>
+        <p style="margin-top: 1rem; text-align: justify;" ><strong>Supported protocols:</strong> Uniswap V2, Uniswap V3, Balancer V1, Balancer V2, SushiSwap, ShibaSwap</p>
+        <p style="font-style: italic; margin-top: 1rem; text-align: justify;" ><strong>Note 0:</strong>To process usd amounts, we currently use <a href="https://www.coingecko.com/fr" target="_blank" class="card-link">coingeko API</a></p>
+        <p style="font-style: italic; margin-top: 1rem; text-align: justify; margin-bottom: 1rem;" ><strong>Note 1:</strong>This is a a very simple demo app. The state is not cleaned over time on this page which means after many blocks, the size of the page becomes big and might result in lags. If it happens, you can just reload the page.</p>
+        <a href="https://aleno.ai/" target="_blank" class="card-link" >Visit Aleno's home page</a>
       </div>
-      <div style="width: 50%;">
+      <div style="width: calc(50% - 1rem);">
         <ul class="nav nav-tabs" id="myTab" role="tablist" >
           <li class="nav-item" role="presentation">
             <button class="nav-link active" id="block-tab" data-bs-toggle="tab" data-bs-target="#block-tab-pane" type="button" role="tab" aria-controls="block-tab-pane" aria-selected="true">Block</button>
@@ -241,19 +244,24 @@
     contentContainer.prepend($(blockComponent));
   }
   
-  const socket = new WebSocket('ws://localhost:8765')
+  const socket = new WebSocket('ws://ec2-13-38-14-102.eu-west-3.compute.amazonaws.com') // dev new WebSocket('ws://localhost:8765') 
   const onEvent = (event) => {
     const { type, data } = JSON.parse(event.data)
     const res = JSON.parse(event.data)
     if(type === 'HISTORY'){
+      console.log('HISTORY ON CONNECTION')
       console.log(event.data)
       data.forEach(block => addBlock(block));
     }
     if(type === 'NEW_BLOCK'){
+      console.log('NEW BLOCK')
+      console.log(event.data[0])
       addBlock(data[0])
     }
   }
   socket.addEventListener('message', onEvent)
+  socket.addEventListener('open', () => { console.log('OPEN CONNECTION') })
+  socket.addEventListener('close', () => { console.log('CLOSE CONNECTION') })
 
 
 </script>
