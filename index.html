@@ -10,8 +10,11 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
   <style>
     body {
-      padding: 30px;
+      padding: 2rem;
       background-color: #ecf0f1;
+    }
+    td{
+      font-size: 12px;
     }
     p{
       margin-bottom: 0;
@@ -20,12 +23,11 @@
     a{
       font-size: 12px;
     }
+    .nav-link{
+      font-size: 12px;
+    }
     h5{
       font-size: 16px;
-    }
-    .entity-desc-list-container{
-      display: flex;
-      justify-content: space-between;
     }
     .large-margin-left{
       margin-left: 2rem;
@@ -35,56 +37,129 @@
     }
     .block-header{
       display: flex;
+      flex-direction: column;
       align-items: center;
     }
 
   </style>
 </head>
 <body>
-  <h1>Swap feed demo</h1>
-  <div class="card">
-    <div class="card-body">
-      <p class="card-text">This is a demo of a swap feed api. Every time a block is mined, it appears below. You can click on any transaction to get details about swaps. Transactions without swaps are not displayed here (same for blocks).</p>
-      <p>Currently, we support: Uniswap V2, Uniswap V3, Balancer V1, Balancer V2, SushiSwap, ShibaSwap</p>
-      <p>On Ethereum blockchain, a block is fetched every 15 seconds on average.</p>
-      <h5>Entities:</h5>
-        <div class="entity-desc-list-container">
-          <div>
-            <h6>Block</h6>
-            <ul>
-              <li>number: the block number</li>
-              <li>timestamp: the timestamp of the block</li>
-              <li>transactions: the list of transactions inside the block (ordered by execution)</li>
-            </ul>
+  <h1 style="text-align: center;" >Aleno feed demo</h1>
+  <div class="card" style="width: 60rem; margin: auto;">
+    <div class="card-body" style="display: flex; justify-content: space-between;" >
+      <div style="width: 30%;" >
+        <h5 class="card-title">Demo description</h5>
+        <p>This is a demo of a swap feed api. Every time a block is mined, it appears below. You can click on any transaction to get details about swaps. Transactions without swaps are not displayed here (same for blocks). Currently, we support: Uniswap V2, Uniswap V3, Balancer V1, Balancer V2, SushiSwap, ShibaSwap On Ethereum blockchain, a block is fetched every 15 seconds on average.</p>
+        <a href="#" class="card-link">Aleno</a>
+      </div>
+      <div style="width: 50%;">
+        <ul class="nav nav-tabs" id="myTab" role="tablist" >
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="block-tab" data-bs-toggle="tab" data-bs-target="#block-tab-pane" type="button" role="tab" aria-controls="block-tab-pane" aria-selected="true">Block</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="transaction-tab" data-bs-toggle="tab" data-bs-target="#transaction-tab-pane" type="button" role="tab" aria-controls="transaction-tab-pane" aria-selected="false">Transaction</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="swap-tab" data-bs-toggle="tab" data-bs-target="#swap-tab-pane" type="button" role="tab" aria-controls="swap-tab-pane" aria-selected="false">Swap</button>
+          </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="block-tab-pane" role="tabpanel" aria-labelledby="block-tab" tabindex="0">
+            
+            <table class="table">
+              <tbody>
+                <tr>
+                  <td><strong>block</strong></td>
+                  <td>Number of the block</td>
+                </tr>
+                <tr>
+                  <td><strong>timestamp</strong></td>
+                  <td>Timestamp of the block</td>
+                </tr>
+                <tr>
+                  <td><strong>transactions</strong></td>
+                  <td>List of transactions within the block. Transactions are ordered by execution. See Transaction tab to see transaction fields</td>
+                </tr>
+              </tbody>
+            </table>
+  
           </div>
-          <div>
-            <h6>Transaction</h6>
-            <ul>
-              <li>hash: the hash of the transaction</li>
-              <li>maker address: the address that performed the transaction</li>
-              <li>eth fee: fee paid by the user to perform the transaction in ETH</li>
-              <li>usd fee: fee paid by the address to perform the transaction in USD</li>
-              <li>swaps: the list of swaps inside the transaction</li>
-            </ul>
+          <div class="tab-pane fade" id="transaction-tab-pane" role="tabpanel" aria-labelledby="transaction-tab" tabindex="0">
+            
+            <table class="table">
+              <tbody>
+                <tr>
+                  <td><strong>hash</strong></td>
+                  <td>hash of the transaction</td>
+                </tr>
+                <tr>
+                  <td><strong>maker_address</strong></td>
+                  <td>Address that performed the transaction</td>
+                </tr>
+                <tr>
+                  <td><strong>eth_fee</strong></td>
+                  <td>Fees paid by the transaction maker to perform the transaction (in ETH)</td>
+                </tr>
+                <tr>
+                  <td><strong>usd_fee</strong></td>
+                  <td>Fees paid by the transaction maker to perform the transaction (in USD)</td>
+                </tr>
+                <tr>
+                  <td><strong>swaps</strong></td>
+                  <td>List of swaps withing the transaction</td>
+                </tr>
+              </tbody>
+            </table>
+  
           </div>
-          <div>
-            <h6>Swap</h6>
-            <ul>
-              <li>log_index: the log_index of the swap</li>
-              <li>protocol_name: the name of the protocol on which the swap occurred</li>
-              <li>contract_address: the address of the pool on which the swap occurred</li>
-              <li>amount_in: the amount of token swapped as input</li>
-              <li>amount_out: the amount of token swapped as output</li>
-              <li>token_in_info: address, name and symbol of the token swapped as input</li>
-              <li>token_out_info: address, name and symbol of the token swapped as output</li>
-              <li>usd_amount: the corresponding USD volume of the swap (can be unknown)</li>
-            </ul>
+          <div class="tab-pane fade" id="swap-tab-pane" role="tabpanel" aria-labelledby="swap-tab" tabindex="0">
+  
+            <table class="table">
+              <tbody>
+                <tr>
+                  <td><strong>log_index</strong></td>
+                  <td>Log index of the transaction</td>
+                </tr>
+                <tr>
+                  <td><strong>protocol_name</strong></td>
+                  <td>name of the protocol on which the transaction occurred</td>
+                </tr>
+                <tr>
+                  <td><strong>contract_address</strong></td>
+                  <td>Address of the contract the swap occurred on</td>
+                </tr>
+                <tr>
+                  <td><strong>amount_in</strong></td>
+                  <td>The amount of token swapped as input</td>
+                </tr>
+                <tr>
+                  <td><strong>amount_out</strong></td>
+                  <td>The amount of token swapped as output</td>
+                </tr>
+                <tr>
+                  <td><strong>token_in_info</strong></td>
+                  <td>address, name and symbol of the token swapped as input</td>
+                </tr>
+                <tr>
+                  <td><strong>token_out_info</strong></td>
+                  <td>address, name and symbol of the token swapped as output</td>
+                </tr>
+                <tr>
+                  <td><strong>usd_amount</strong></td>
+                  <td>the corresponding USD volume of the swap (can be unknown)</td>
+                </tr>
+              </tbody>
+            </table>
+  
           </div>
         </div>
-      <p>Note: to process usd amounts, we currently use coingeko</p>
-      <a href="#" class="card-link">Aleno</a>
+
+      </div>
+    
     </div>
   </div>
+
   <div id="content-container"></div>
 </body>
 <script>
@@ -156,7 +231,7 @@
       <div class="block-container">
         <div class="block-header" >
           <h3>Block ${number}</h3>
-          <h5 class="large-margin-left">${new Date(timestamp*1000).toLocaleString()}</h5>
+          <h5>${new Date(timestamp*1000).toLocaleString()}</h5>
         </div>
         <div class="accordion" id="accordionExample">
           ${transactionsComponent}
@@ -174,9 +249,9 @@
       console.log(event.data)
       data.forEach(block => addBlock(block));
     }
-    // if(type === 'NEW_BLOCK'){
-    //   addBlock(data[0])
-    // }
+    if(type === 'NEW_BLOCK'){
+      addBlock(data[0])
+    }
   }
   socket.addEventListener('message', onEvent)
 
