@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aleno-feed-demo</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+  <style>
+    body {
+      padding: 30px;
+      background-color: #ecf0f1;
+    }
+    p{
+      margin-bottom: 0;
+      font-size: 12px;
+    }
+    a{
+      font-size: 12px;
+    }
+    h5{
+      font-size: 16px;
+    }
+    .entity-desc-list-container{
+      display: flex;
+      justify-content: space-between;
+    }
+    .large-margin-left{
+      margin-left: 2rem;
+    }
+    .block-container{
+      margin-top: 3rem;
+    }
+    .block-header{
+      display: flex;
+      align-items: center;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Swap feed demo</h1>
+  <div class="card">
+    <div class="card-body">
+      <p class="card-text">This is a demo of a swap feed api. Every time a block is mined, it appears below. You can click on any transaction to get details about swaps. Transactions without swaps are not displayed here (same for blocks).</p>
+      <p>Currently, we support: Uniswap V2, Uniswap V3, Balancer V1, Balancer V2, SushiSwap, ShibaSwap</p>
+      <p>On Ethereum blockchain, a block is fetched every 15 seconds on average.</p>
+      <h5>Entities:</h5>
+        <div class="entity-desc-list-container">
+          <div>
+            <h6>Block</h6>
+            <ul>
+              <li>number: the block number</li>
+              <li>timestamp: the timestamp of the block</li>
+              <li>transactions: the list of transactions inside the block (ordered by execution)</li>
+            </ul>
+          </div>
+          <div>
+            <h6>Transaction</h6>
+            <ul>
+              <li>hash: the hash of the transaction</li>
+              <li>maker address: the address that performed the transaction</li>
+              <li>eth fee: fee paid by the user to perform the transaction in ETH</li>
+              <li>usd fee: fee paid by the address to perform the transaction in USD</li>
+              <li>swaps: the list of swaps inside the transaction</li>
+            </ul>
+          </div>
+          <div>
+            <h6>Swap</h6>
+            <ul>
+              <li>log_index: the log_index of the swap</li>
+              <li>protocol_name: the name of the protocol on which the swap occurred</li>
+              <li>contract_address: the address of the pool on which the swap occurred</li>
+              <li>amount_in: the amount of token swapped as input</li>
+              <li>amount_out: the amount of token swapped as output</li>
+              <li>token_in_info: address, name and symbol of the token swapped as input</li>
+              <li>token_out_info: address, name and symbol of the token swapped as output</li>
+              <li>usd_amount: the corresponding USD volume of the swap (can be unknown)</li>
+            </ul>
+          </div>
+        </div>
+      <p>Note: to process usd amounts, we currently use coingeko</p>
+      <a href="#" class="card-link">Aleno</a>
+    </div>
+  </div>
+  <div id="content-container"></div>
+</body>
+<script>
+
+  const contentContainer = $("#content-container")
+
+  const chevronComponent = `<svg style="margin-left: 1rem; margin-right: 1rem;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+  </svg>`
+
+  const indicatorComponent = (title, value, width) => (`
+    <div style="overflow-x: scroll; width: ${width}px" >
+      <p style="color: #34495e;" ><strong>${title}</strong><p> 
+      <p>${value}</p>
+    </div>`
+  )
+
+  const swapComponent = (swap) => {
+    const { amount_in, amount_out, token_in_info, token_out_info, usd_amount, contract_address, protocol_name, log_index } = swap
+    console.log(swap)
+    const usdString = usd_amount ? `${usd_amount.toFixed()} $` : 'unknown'
+    return `
+    <div style="display: flex; margin-top: 1rem; align-items: center;">
+      <div style="display: flex; align-items: center; width: 700px;">
+        <h5 style="margin-bottom: 0;" >${amount_in.toFixed(2)} ${token_in_info.symbol}</h5>
+        ${chevronComponent}
+        <h5 style="margin-bottom: 0;">${amount_out.toFixed(2)} ${token_out_info.symbol}</h5>
+      </div>
+      ${indicatorComponent('Pool', contract_address, 500)}
+      ${indicatorComponent('Volume', usdString, 200)}
+      ${indicatorComponent('Protocol', protocol_name, 200)}
+      ${indicatorComponent('Log index', log_index, 200)}
+    </div>`
+  }
+  
+  const getTransactionComponent = (transaction) => {
+    const { hash, maker_address, swaps, eth_fee, usd_fee } = transaction
+    const usdVolume = swaps.reduce((previousValue, newSwap) => previousValue + (newSwap.usd_amount ? newSwap.usd_amount : 0), 0)
+    const usdVolumeString = usdVolume > 0 ? `${usdVolume.toFixed()} $` : 'unknown'
+    const swapsComponent = swaps.map(swapComponent).join('')
+    const swapCount = swaps.length
+    const feeString = `${eth_fee.toFixed(3)} eth (${usd_fee.toFixed()} $)`
+    return `
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingTwo">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#tx-${hash}" aria-expanded="false" aria-controls="${hash}">
+          ${indicatorComponent('Transaction hash', hash, 700)}
+          ${indicatorComponent('Maker address', maker_address, 500)}
+          ${indicatorComponent('Total volume', usdVolumeString, 200)}
+          ${indicatorComponent('Swaps', swapCount, 200)}
+          ${indicatorComponent('Fees', feeString, 200)}
+        </button>
+      </h2>
+      <div id="tx-${hash}" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          ${swapsComponent}
+          <a href="https://etherscan.io/tx/${hash}" class="card-link" target="_blank">Check on Etherscan</a>
+        </div>
+      </div>
+    </div>`
+  }
+
+  const addBlock = (block) => {
+    const { number, timestamp, transactions } = block
+    const transactionsComponent = transactions.map(transaction => getTransactionComponent(transaction)).join('')
+
+
+    const blockComponent = `
+      <div class="block-container">
+        <div class="block-header" >
+          <h3>Block ${number}</h3>
+          <h5 class="large-margin-left">${new Date(timestamp*1000).toLocaleString()}</h5>
+        </div>
+        <div class="accordion" id="accordionExample">
+          ${transactionsComponent}
+        </div>
+      <div>
+    `
+    contentContainer.prepend($(blockComponent));
+  }
+  
+  const socket = new WebSocket('ws://localhost:8765')
+  const onEvent = (event) => {
+    const { type, data } = JSON.parse(event.data)
+    const res = JSON.parse(event.data)
+    if(type === 'HISTORY'){
+      console.log(event.data)
+      data.forEach(block => addBlock(block));
+    }
+    // if(type === 'NEW_BLOCK'){
+    //   addBlock(data[0])
+    // }
+  }
+  socket.addEventListener('message', onEvent)
+
+
+</script>
+</html>
